@@ -1,7 +1,7 @@
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
-from knight_random_walk_simulator import KnightSimulator, analyze_results
+from .knight_random_walk_simulator import KnightSimulator, SimulationAnalyzer
 
 def main():
     parser = argparse.ArgumentParser(
@@ -37,7 +37,7 @@ def main():
     if raw_results is None:
         return
 
-    stats = analyze_results(raw_results)
+    stats = SimulationAnalyzer.analyze_results(raw_results)
 
     print("\n--- Simulation Results ---")
     print(f"Mean distinct squares visited: {stats['mean']:.2f}")

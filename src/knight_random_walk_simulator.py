@@ -14,6 +14,7 @@ from multiprocessing import Pool, cpu_count
 from itertools import repeat
 import numpy as np
 from typing import Tuple, Set
+from tqdm import tqdm
 
 
 class KnightSimulator:
@@ -78,39 +79,44 @@ class KnightSimulator:
                 results_iterator = pool.imap_unordered(
                     self._simulate_knight_walk, repeat(n_moves, n_simulations), chunksize=chunksize
                 )
-                return np.fromiter(results_iterator, dtype=int, count=n_simulations)
+                return np.fromiter(tqdm(results_iterator, total=n_simulations, desc="Running simulations"), dtype=int, count=n_simulations)
         except Exception as e:
             print(f"An unexpected error occurred during simulation: {str(e)}")
             return None
 
 
-def analyze_results(results: np.ndarray) -> dict:
+class SimulationAnalyzer:
     """
-    Analyzes the raw results from the knight walk simulations.
-
-    Args:
-        results: A numpy array of integers, where each integer is the number
-                 of distinct squares visited in a single simulation.
-
-    Returns:
-        A dictionary containing the simulation results, including:
-        - 'mean': The average number of distinct squares visited.
-        - 'std_dev': The standard deviation of the results.
-        - 'confidence_interval': A tuple with the 95% confidence interval.
-        - 'min': The minimum number of distinct squares visited.
-        - 'max': The maximum number of distinct squares visited.
+    A class to analyze the results of knight random walk simulations.
     """
-    n_simulations = len(results)
-    mean = np.mean(results)
-    std = np.std(results)
-    conf_width = 1.96 * (std / np.sqrt(n_simulations))
-    return {
-        'mean': mean,
-        'std_dev': std,
-        'confidence_interval': (mean - conf_width, mean + conf_width),
-        'min': int(np.min(results)),
-        'max': int(np.max(results))
-    }
+    @staticmethod
+    def analyze_results(results: np.ndarray) -> dict:
+        """
+        Analyzes the raw results from the knight walk simulations.
+
+        Args:
+            results: A numpy array of integers, where each integer is the number
+                     of distinct squares visited in a single simulation.
+
+        Returns:
+            A dictionary containing the simulation results, including:
+            - 'mean': The average number of distinct squares visited.
+            - 'std_dev': The standard deviation of the results.
+            - 'confidence_interval': A tuple with the 95% confidence interval.
+            - 'min': The minimum number of distinct squares visited.
+            - 'max': The maximum number of distinct squares visited.
+        """
+        n_simulations = len(results)
+        mean = np.mean(results)
+        std = np.std(results)
+        conf_width = 1.96 * (std / np.sqrt(n_simulations))
+        return {
+            'mean': mean,
+            'std_dev': std,
+            'confidence_interval': (mean - conf_width, mean + conf_width),
+            'min': int(np.min(results)),
+            'max': int(np.max(results))
+        }
 
 
 
