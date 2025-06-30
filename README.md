@@ -46,7 +46,7 @@ python src/main.py --help
 Example usage:
 
 ```bash
-python src/main.py --simulations 100000 --moves 100 --output my_simulation_plot.png
+python -m src.main --simulations 100000 --moves 100 --output my_simulation_plot.png
 ```
 
 - `--simulations`: Number of simulations to run (default: 1,000,000)

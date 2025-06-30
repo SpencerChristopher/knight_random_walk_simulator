@@ -1,4 +1,9 @@
-.idea
-.venv
-.iml
-.xml
+# PyCharm files
+.idea/
+*.iml
+*.xml
+
+# Python cache and virtual environment
+__pycache__/
+.venv/
+.env
