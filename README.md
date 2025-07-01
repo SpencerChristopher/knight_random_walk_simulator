@@ -10,13 +10,13 @@ The project is structured to ensure modularity, maintainability, and clear separ
 knight_random_walk_simulator/
 ├── src/
 │   ├── __pycache__/                  # Python bytecode cache
-│   ├── .gitignore                    # Git ignore file for source directory
 │   ├── knight_random_walk_simulator.py  # Contains the KnightSimulator class (core simulation logic)
 │   ├── cli.py                        # Handles all Command Line Interface (CLI) logic, argument parsing, and visualization
-│   ├── main.py                       # Minimal entry point for the application, calls cli.py
-│   └── requirements.txt              # Lists Python dependencies for the project
+│   └── main.py                       # Minimal entry point for the application, calls cli.py
+├── .gitignore                        # Git ignore file
 ├── README.md                         # This file: project overview, structure, and usage
-└── LICENSE                           # Apache 2.0 License file
+├── LICENSE                           # Apache 2.0 License file
+└── requirements.txt                  # Lists Python dependencies for the project
 ```
 
 - `knight_random_walk_simulator.py`: Encapsulates the core simulation logic within the `KnightSimulator` class, including the knight's movement and distinct square tracking.
@@ -32,21 +32,21 @@ knight_random_walk_simulator/
     ```
 2.  **Install dependencies:**
     ```bash
-    pip install -r src/requirements.txt
+    pip install -r requirements.txt
     ```
 
 ## Usage
 
-To run the simulation from the command line, navigate to the project root directory and execute `main.py` with desired arguments. The CLI is handled by `src/cli.py`.
+To run the simulation from the command line, navigate to the project root directory and execute the module with desired arguments. The CLI is handled by `src/cli.py`.
 
 ```bash
-python src/main.py --help
+python -m src.main --help
 ```
 
 Example usage:
 
 ```bash
-python src/main.py --simulations 100000 --moves 100 --output my_simulation_plot.png
+python -m src.main --simulations 100000 --moves 100 --output my_simulation_plot.png
 ```
 
 - `--simulations`: Number of simulations to run (default: 1,000,000)

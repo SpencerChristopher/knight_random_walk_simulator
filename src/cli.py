@@ -1,7 +1,7 @@
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
-from knight_random_walk_simulator import KnightSimulator
+from .knight_random_walk_simulator import KnightSimulator, SimulationAnalyzer
 
 def main():
     parser = argparse.ArgumentParser(
@@ -29,25 +29,26 @@ def main():
     args = parser.parse_args()
 
     simulator = KnightSimulator()
-    results = simulator.run_simulations(
+    raw_results = simulator.run_simulations(
         n_simulations=args.simulations,
         n_moves=args.moves
     )
 
-    if 'error' in results:
-        print(f"Error: {results['error']}")
+    if raw_results is None:
         return
 
+    stats = SimulationAnalyzer.analyze_results(raw_results)
+
     print("\n--- Simulation Results ---")
-    print(f"Mean distinct squares visited: {results['mean']:.2f}")
-    print(f"Standard deviation: {results['std_dev']:.2f}")
-    print(f"95% Confidence Interval: ({results['confidence_interval'][0]:.2f}, {results['confidence_interval'][1]:.2f})")
-    print(f"Minimum distinct squares visited: {results['min']}")
-    print(f"Maximum distinct squares visited: {results['max']}")
+    print(f"Mean distinct squares visited: {stats['mean']:.2f}")
+    print(f"Standard deviation: {stats['std_dev']:.2f}")
+    print(f"95% Confidence Interval: ({stats['confidence_interval'][0]:.2f}, {stats['confidence_interval'][1]:.2f})")
+    print(f"Minimum distinct squares visited: {stats['min']}")
+    print(f"Maximum distinct squares visited: {stats['max']}")
 
     # Generate and save histogram
     plt.figure(figsize=(10, 6))
-    plt.hist(simulator.all_results, bins=50, edgecolor='black', alpha=0.7)
+    plt.hist(raw_results, bins=50, edgecolor='black', alpha=0.7)
     plt.title(f"Distribution of Distinct Squares Visited (N={args.simulations}, M={args.moves})")
     plt.xlabel("Number of Distinct Squares Visited")
     plt.ylabel("Frequency")
@@ -57,3 +58,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

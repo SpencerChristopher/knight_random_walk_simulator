@@ -14,12 +14,12 @@ from multiprocessing import Pool, cpu_count
 from itertools import repeat
 import numpy as np
 from typing import Tuple, Set
+from tqdm import tqdm
 
 
 class KnightSimulator:
     """
-    A class to simulate the random walk of a knight on an infinite chessboard
-    and analyze the results.
+    A class to simulate the random walk of a knight on an infinite chessboard.
     """
 
     # All 8 possible L-shaped knight moves, precomputed for efficiency
@@ -27,9 +27,6 @@ class KnightSimulator:
         (2, 1), (1, 2), (-1, 2), (-2, 1),
         (-2, -1), (-1, -2), (1, -2), (2, -1)
     )
-
-    def __init__(self):
-        self.all_results = None  # To store raw simulation results for plotting
 
     def _simulate_knight_walk(self, n_moves: int) -> int:
         """
@@ -57,17 +54,49 @@ class KnightSimulator:
             self,
             n_simulations: int = 1_000_000,
             n_moves: int = 50
-    ) -> dict:
+    ) -> np.ndarray | None:
         """
         Runs a specified number of knight walk simulations in parallel.
 
         This method uses multiprocessing to distribute the simulations across
-        multiple CPU cores, significantly speeding up the computation. It collects
-        the results and computes key statistical measures.
+        multiple CPU cores, significantly speeding up the computation.
 
         Args:
             n_simulations: The total number of simulations to run.
             n_moves: The number of moves for each individual simulation.
+
+        Returns:
+            A numpy array containing the number of distinct squares visited
+            in each simulation, or None if an error occurs.
+        """
+        if n_simulations <= 0 or n_moves < 0:
+            print("Error: Number of simulations and moves must be positive.")
+            return None
+        try:
+            n_workers = max(1, min(cpu_count(), n_simulations // 1000 if n_simulations >= 1000 else 1))
+            with Pool(n_workers) as pool:
+                chunksize = max(1, n_simulations // (n_workers * 4))
+                results_iterator = pool.imap_unordered(
+                    self._simulate_knight_walk, repeat(n_moves, n_simulations), chunksize=chunksize
+                )
+                return np.fromiter(tqdm(results_iterator, total=n_simulations, desc="Running simulations"), dtype=int, count=n_simulations)
+        except Exception as e:
+            print(f"An unexpected error occurred during simulation: {str(e)}")
+            return None
+
+
+class SimulationAnalyzer:
+    """
+    A class to analyze the results of knight random walk simulations.
+    """
+    @staticmethod
+    def analyze_results(results: np.ndarray) -> dict:
+        """
+        Analyzes the raw results from the knight walk simulations.
+
+        Args:
+            results: A numpy array of integers, where each integer is the number
+                     of distinct squares visited in a single simulation.
 
         Returns:
             A dictionary containing the simulation results, including:
@@ -76,32 +105,18 @@ class KnightSimulator:
             - 'confidence_interval': A tuple with the 95% confidence interval.
             - 'min': The minimum number of distinct squares visited.
             - 'max': The maximum number of distinct squares visited.
-            - 'error': An error message, if the simulation failed.
         """
-        if n_simulations <= 0 or n_moves < 0:
-            return {'error': "Number of simulations and moves must be positive."}
-        try:
-            n_workers = max(1, min(cpu_count(), n_simulations // 1000 if n_simulations >= 1000 else 1))
-            with Pool(n_workers) as pool:
-                chunksize = max(1, n_simulations // (n_workers * 4))
-                results_iterator = pool.imap_unordered(
-                    self._simulate_knight_walk, repeat(n_moves, n_simulations), chunksize=chunksize
-                )
-                self.all_results = np.fromiter(results_iterator, dtype=int, count=n_simulations)
-
-            mean = np.mean(self.all_results)
-            std = np.std(self.all_results)
-            conf_width = 1.96 * (std / np.sqrt(n_simulations))
-            return {
-                'mean': mean,
-                'std_dev': std,
-                'confidence_interval': (mean - conf_width, mean + conf_width),
-                'min': int(np.min(self.all_results)),
-                'max': int(np.max(self.all_results))
-            }
-        except Exception as e:
-            print(f"An unexpected error occurred during simulation: {str(e)}")
-            return {'error': f"Simulation failed due to an unexpected error: {str(e)}"}
+        n_simulations = len(results)
+        mean = np.mean(results)
+        std = np.std(results)
+        conf_width = 1.96 * (std / np.sqrt(n_simulations))
+        return {
+            'mean': mean,
+            'std_dev': std,
+            'confidence_interval': (mean - conf_width, mean + conf_width),
+            'min': int(np.min(results)),
+            'max': int(np.max(results))
+        }
 
 
 
