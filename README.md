@@ -28,7 +28,7 @@ knight_random_walk_simulator/
 
 1.  **Navigate to the project root directory:**
     ```bash
-    cd C:\Users\chris\PycharmProjects\knight_random_walk_simulator
+    cd C:\Users\user\knight_random_walk_simulator
     ```
 2.  **Install dependencies:**
     ```bash
